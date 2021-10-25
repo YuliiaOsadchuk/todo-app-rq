@@ -8,7 +8,9 @@ import { getAllTodos, removeTodo, updateTodo } from "../../api";
 const TodoList: React.FC = () => {
   const [editableItem, setEditableItem] = useState<ITodo | null>(null);
 
-  const { data } = useQuery("todos", getAllTodos, );
+  const { data } = useQuery("todos", getAllTodos, {
+    cacheTime: 5000,
+  });
   const { mutateAsync: mutateRemove } = useMutation(removeTodo);
   const { mutateAsync: mutateEdit } = useMutation(updateTodo);
 

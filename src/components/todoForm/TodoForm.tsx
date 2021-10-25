@@ -21,6 +21,7 @@ const TodoForm: React.FC = () => {
       completed: false,
     });
     queryClient.invalidateQueries("todos");
+    setTitle("");
   };
 
   return (
