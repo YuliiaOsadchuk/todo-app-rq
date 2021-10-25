@@ -1,14 +1,14 @@
 import React, { useState } from "react";
-import { ITodo } from "../../interfaces";
 import { Spacer, Button, Input } from "../../global.styles";
 import { Label } from "./TodoForm.styles";
-import { useMutation } from "react-query";
+import { useMutation, useQueryClient } from "react-query";
 import { addTodo } from "../../api";
 
 const TodoForm: React.FC = () => {
   const [title, setTitle] = useState("");
 
   const { mutateAsync } = useMutation(addTodo);
+  const queryClient = useQueryClient();
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(event.target.value);
@@ -20,6 +20,7 @@ const TodoForm: React.FC = () => {
       title: title,
       completed: false,
     });
+    queryClient.invalidateQueries("todos");
   };
 
   return (

@@ -1,15 +1,20 @@
 import { ITodo } from "./interfaces";
 
-const API_URL =
-  "https://my-json-server.typicode.com/YuliiaOsadchuk/todo-app-rq/todos";
+const API_URL = "http://localhost:3000/todos";
 
-export const fetchAllTodos = async (): Promise<ITodo[]> => {
+export const getAllTodos = async (): Promise<ITodo[]> => {
   const response = await fetch(`${API_URL}`);
-
   if (!response.ok) {
     throw new Error("Something went wrong");
   }
+  return response.json();
+};
 
+export const getTodo = async (id: number) => {
+  const response = await fetch(`${API_URL}/${id}`);
+  if (!response.ok) {
+    throw new Error("Something went wrong");
+  }
   return response.json();
 };
 
@@ -19,11 +24,7 @@ export const addTodo = async (todo: ITodo): Promise<ITodo> => {
     headers: {
       "Content-type": "application/json",
     },
-    body: JSON.stringify({
-      id: todo.id,
-      title: todo.title,
-      completed: todo.completed,
-    }),
+    body: JSON.stringify(todo),
   });
 
   if (!response.ok) {
@@ -36,6 +37,22 @@ export const addTodo = async (todo: ITodo): Promise<ITodo> => {
 export const removeTodo = async (id: number) => {
   const response = await fetch(`${API_URL}/${id}`, {
     method: "DELETE",
+  });
+
+  if (!response.ok) {
+    throw new Error("Something went wrong");
+  }
+
+  return response.json();
+};
+
+export const updateTodo = async (todo: ITodo) => {
+  const response = await fetch(`${API_URL}/${todo.id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(todo),
   });
 
   if (!response.ok) {

@@ -1,23 +1,38 @@
 import React, { useState } from "react";
-import { useQuery } from "react-query";
+import { useQuery, useMutation, useQueryClient } from "react-query";
 import { ITodo } from "../../interfaces";
 import { Button, Input, Spacer } from "../../global.styles";
 import { Item, Title } from "./TodoList.styles";
-import { fetchAllTodos, removeTodo } from "../../api";
-import { useMutation, useQueryClient } from "react-query";
+import { getAllTodos, removeTodo, updateTodo } from "../../api";
 
 const TodoList: React.FC = () => {
   const [editableItem, setEditableItem] = useState<ITodo | null>(null);
 
-  const { data } = useQuery("todos", fetchAllTodos);
+  const { data } = useQuery("todos", getAllTodos, );
+  const { mutateAsync: mutateRemove } = useMutation(removeTodo);
+  const { mutateAsync: mutateEdit } = useMutation(updateTodo);
+
   const queryClient = useQueryClient();
-  const { mutateAsync } = useMutation(removeTodo);
 
-  console.log("list: ", data);
-
-  const handleRemoveTodo = async (id: number) => {
-    await mutateAsync(id);
+  const handleTodoRemove = async (id: number) => {
+    await mutateRemove(id);
     queryClient.invalidateQueries("todos");
+  };
+
+  const handleTodoEdit = async (item: ITodo) => {
+    setEditableItem(item);
+  };
+
+  const handleTodoSave = async (item: ITodo) => {
+    await mutateEdit(item);
+    queryClient.invalidateQueries("todos");
+    setEditableItem(null);
+  };
+
+  const handleTodoToogle = async (item: ITodo) => {
+    await mutateEdit({ ...item, completed: !item.completed });
+    queryClient.invalidateQueries("todos");
+    setEditableItem(null);
   };
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -28,7 +43,7 @@ const TodoList: React.FC = () => {
   const renderEditableItem = (item: ITodo) => (
     <Spacer>
       <Input value={item.title} type="text" onChange={handleInputChange} />
-      <Button>save</Button>
+      <Button onClick={() => handleTodoSave(item)}>save</Button>
     </Spacer>
   );
 
@@ -36,13 +51,25 @@ const TodoList: React.FC = () => {
     <Spacer key={item.id}>
       <Item>
         <div>
-          <input type="checkbox" checked={item.completed} onChange={() => {}} />
+          <input
+            type="checkbox"
+            checked={item.completed}
+            onChange={() => {
+              handleTodoToogle(item);
+            }}
+          />
           <Title completed={item.completed}>{item.title}</Title>
         </div>
-        <Button onClick={() => {}}>edit</Button>
         <Button
           onClick={() => {
-            handleRemoveTodo(item.id);
+            handleTodoEdit(item);
+          }}
+        >
+          edit
+        </Button>
+        <Button
+          onClick={() => {
+            handleTodoRemove(item.id);
           }}
         >
           delete
