@@ -38,8 +38,9 @@ const TodoList: React.FC = () => {
   };
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    editableItem &&
+    if (editableItem) {
       setEditableItem({ ...editableItem, title: event.target.value });
+    }
   };
 
   const renderEditableItem = (item: ITodo) => (
