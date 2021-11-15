@@ -27,9 +27,7 @@ const TodosTable: React.FC<Props> = ({ todos }) => (
           ))}
         </tbody>
       </Table>
-    ) : (
-      <p>You dont have any todo yet</p>
-    )}
+    ) : null}
   </>
 );
 

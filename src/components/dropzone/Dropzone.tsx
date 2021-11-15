@@ -4,8 +4,8 @@ import { useDropzone } from "react-dropzone";
 import { todosMachine } from "../todos/todosMachine";
 import TodosTable from "../todosTable/TodosTable";
 import { ITodo } from "../../interfaces";
-import { Button, SpacerRow } from "../../global.styles";
-import { Flex, Text } from "./Dropzone.styles";
+import { Button, Spacer, SpacerRow } from "../../global.styles";
+import { FlexDropzone, Text } from "./Dropzone.styles";
 
 interface Props {
   onClose: (isActive: boolean) => void;
@@ -14,6 +14,7 @@ interface Props {
 
 const Dropzone: React.FC<Props> = ({ onClose, onAdd }) => {
   const [todos, setTodos] = useState<ITodo[]>([]);
+  const [selectedFilePath, setSelectedFilePath] = useState();
   const [todosState, send] = useMachine(todosMachine, {
     actions: {
       loadData: (context, event) => {
@@ -51,6 +52,7 @@ const Dropzone: React.FC<Props> = ({ onClose, onAdd }) => {
       reader.onload = () => {
         const result = JSON.parse(reader.result as string);
         setTodos(result);
+        setSelectedFilePath(file.path);
       };
       reader.readAsText(file);
     });
@@ -60,17 +62,23 @@ const Dropzone: React.FC<Props> = ({ onClose, onAdd }) => {
 
   return (
     <>
-      <Flex>
-        <div {...getRootProps()}>
-          <input {...getInputProps()} />
-          {isDragActive ? (
-            <Text>Drop the files here ...</Text>
-          ) : (
-            <Text>Drag 'n' drop some files here, or click to select files</Text>
-          )}
-        </div>
-      </Flex>
-      <TodosTable todos={todosState.context.todos || []} />
+      <FlexDropzone>
+        {!selectedFilePath ? (
+          <div {...getRootProps()}>
+            <input {...getInputProps()} />
+            {isDragActive ? (
+              <Text>Drop the files here ...</Text>
+            ) : (
+              <Text>
+                Drag 'n' drop some files here, or click to select files
+              </Text>
+            )}
+          </div>
+        ) : (
+          <div>{selectedFilePath}</div>
+        )}
+      </FlexDropzone>
+      <Spacer />
       <Button
         onClick={() => {
           send({
@@ -84,12 +92,13 @@ const Dropzone: React.FC<Props> = ({ onClose, onAdd }) => {
       <SpacerRow />
       <Button onClick={handleCancelClick}>cancel</Button>
       <Text>{todosState.context.errorMessage}</Text>
+      <TodosTable todos={todosState.context.todos || []} />
       {message && (
         <>
-          <Text>{message}</Text>
           <Button onClick={() => handleAddClick(todosState.context.todos)}>
             Add todos
           </Button>
+          <Text>{message}</Text>
         </>
       )}
     </>
