@@ -14,17 +14,8 @@ interface Props {
 
 const Dropzone: React.FC<Props> = ({ onClose, onAdd }) => {
   const [todos, setTodos] = useState<ITodo[]>([]);
-  const [selectedFilePath, setSelectedFilePath] = useState();
-  const [todosState, send] = useMachine(todosMachine, {
-    actions: {
-      loadData: (context, event) => {
-        send({
-          type: "RESOLVE",
-          todos: todos,
-        });
-      },
-    },
-  });
+  const [selectedFilePath, setSelectedFilePath] = useState("");
+  const [todosState, send] = useMachine(todosMachine);
 
   const message = todosState.context.message;
 
@@ -33,12 +24,22 @@ const Dropzone: React.FC<Props> = ({ onClose, onAdd }) => {
   };
 
   const handleAddClick = (todos: ITodo[]) => {
-    console.log("todos: ", todos);
     onAdd(todos);
+    send({
+      type: "LOAD",
+      message: "Todos have been successfully loaded",
+    });
     onClose(false);
   };
 
-  const onDrop = (acceptedFiles: any[]) => {
+  const handleLoadClick = () => {
+    send({
+      type: "RESOLVE",
+      todos,
+    });
+  };
+
+  const onDrop = (acceptedFiles: File[]) => {
     send({ type: "LOAD" });
     acceptedFiles.forEach((file) => {
       const reader = new FileReader();
@@ -52,7 +53,7 @@ const Dropzone: React.FC<Props> = ({ onClose, onAdd }) => {
       reader.onload = () => {
         const result = JSON.parse(reader.result as string);
         setTodos(result);
-        setSelectedFilePath(file.path);
+        setSelectedFilePath(file.name);
       };
       reader.readAsText(file);
     });
@@ -79,28 +80,15 @@ const Dropzone: React.FC<Props> = ({ onClose, onAdd }) => {
         )}
       </FlexDropzone>
       <Spacer />
-      <Button
-        onClick={() => {
-          send({
-            type: "LOAD",
-            message: "Todos have been successfully loaded",
-          });
-        }}
-      >
-        load todos
-      </Button>
+      <Button onClick={handleLoadClick}>load todos</Button>
       <SpacerRow />
       <Button onClick={handleCancelClick}>cancel</Button>
       <Text>{todosState.context.errorMessage}</Text>
       <TodosTable todos={todosState.context.todos || []} />
-      {message && (
-        <>
-          <Button onClick={() => handleAddClick(todosState.context.todos)}>
-            Add todos
-          </Button>
-          <Text>{message}</Text>
-        </>
-      )}
+      <Button onClick={() => handleAddClick(todosState.context.todos)}>
+        Add todos
+      </Button>
+      <Text>{message}</Text>
     </>
   );
 };

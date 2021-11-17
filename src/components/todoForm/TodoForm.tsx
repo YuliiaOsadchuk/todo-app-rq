@@ -10,7 +10,11 @@ const TodoForm: React.FC = () => {
   const [title, setTitle] = useState("");
   const [isActiveModal, setIsActiveModal] = useState(false);
 
-  const { mutateAsync: addTodoMutation } = useMutation(addTodo);
+  const { mutateAsync: addTodoMutation } = useMutation(addTodo, {
+    onSuccess: (data) => {
+      queryClient.setQueryData(["todos"], data);
+    },
+  });
   const queryClient = useQueryClient();
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,19 +27,19 @@ const TodoForm: React.FC = () => {
       title: title,
       completed: false,
     });
-    queryClient.invalidateQueries("todos");
     setTitle("");
   };
 
   const handleAddTodos = async (todos: ITodo[]) => {
-    const promises = todos.map((todo) => addTodoMutation(todo));
-    await Promise.all(promises);
-
-    queryClient.invalidateQueries("todos");
+    await addTodoMutation(todos);
   };
 
   const handleUploadTodos = () => {
     setIsActiveModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsActiveModal(false);
   };
 
   return (
@@ -63,7 +67,7 @@ const TodoForm: React.FC = () => {
       </Row>
       <Modal
         isActive={isActiveModal}
-        onClose={() => setIsActiveModal(false)}
+        onClose={handleCloseModal}
         onAdd={handleAddTodos}
       />
     </>

@@ -6,7 +6,7 @@ export const FlexDropzone = styled.div`
   justify-content: center;
   height: 100px;
   background-color: #ccc;
-  border: 1px dashed darkgray;
+  border: 1px dashed #a9a9a9;
   border-radius: 8px;
 `;
 
