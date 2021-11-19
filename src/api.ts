@@ -1,6 +1,6 @@
 import { ITodo } from "./interfaces";
 
-const API_URL = "http://localhost:3000/todos";
+const API_URL = "http://localhost:5000/todos";
 
 export const getAllTodos = async (): Promise<ITodo[]> => {
   try {
@@ -20,7 +20,9 @@ export const getTodo = async (id: number) => {
   }
 };
 
-export const addTodo = async (todo: ITodo): Promise<ITodo> => {
+export const addTodo = async (
+  todo: ITodo | ITodo[]
+): Promise<ITodo | ITodo[]> => {
   try {
     const response = await fetch(`${API_URL}`, {
       method: "POST",

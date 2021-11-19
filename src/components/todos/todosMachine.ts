@@ -23,9 +23,8 @@ export const todosMachine = createMachine<TodosContext>(
         },
       },
       loading: {
-        entry: ["loadData"],
         on: {
-          RESOLVE: { target: "success", actions: ["setTodos"] },
+          RESOLVE: { target: "success", actions: ["loadData", "setTodos"] },
           REJECT: { target: "failed", actions: ["setErrorMessage"] },
         },
       },
@@ -51,6 +50,9 @@ export const todosMachine = createMachine<TodosContext>(
       })),
       setErrorMessage: assign((context, event: any) => ({
         errorMessage: event.errorMessage,
+      })),
+      loadData: assign((context, event: any) => ({
+        todos: event.todos,
       })),
     },
   }
