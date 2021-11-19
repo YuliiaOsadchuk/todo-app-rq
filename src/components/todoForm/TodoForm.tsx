@@ -1,13 +1,20 @@
 import React, { useState } from "react";
-import { Spacer, Button, Input } from "../../global.styles";
+import { Spacer, SpacerRow, Button, Input, Row } from "../../global.styles";
 import { Label } from "./TodoForm.styles";
 import { useMutation, useQueryClient } from "react-query";
 import { addTodo } from "../../api";
+import Modal from "../modal/Modal";
+import { ITodo } from "../../interfaces";
 
 const TodoForm: React.FC = () => {
   const [title, setTitle] = useState("");
+  const [isActiveModal, setIsActiveModal] = useState(false);
 
-  const { mutateAsync } = useMutation(addTodo);
+  const { mutateAsync: addTodoMutation } = useMutation(addTodo, {
+    onSuccess: (data) => {
+      queryClient.setQueryData(["todos"], data);
+    },
+  });
   const queryClient = useQueryClient();
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -15,13 +22,24 @@ const TodoForm: React.FC = () => {
   };
 
   const handleAddTodo = async (title: string) => {
-    await mutateAsync({
+    await addTodoMutation({
       id: Date.now(),
       title: title,
       completed: false,
     });
-    queryClient.invalidateQueries("todos");
     setTitle("");
+  };
+
+  const handleAddTodos = async (todos: ITodo[]) => {
+    await addTodoMutation(todos);
+  };
+
+  const handleUploadTodos = () => {
+    setIsActiveModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsActiveModal(false);
   };
 
   return (
@@ -36,13 +54,22 @@ const TodoForm: React.FC = () => {
         value={title}
       />
       <Spacer />
-      <Button
-        onClick={() => {
-          handleAddTodo(title);
-        }}
-      >
-        Add
-      </Button>
+      <Row>
+        <Button
+          onClick={() => {
+            handleAddTodo(title);
+          }}
+        >
+          Add todos
+        </Button>
+        <SpacerRow />
+        <Button onClick={handleUploadTodos}>Upload todos</Button>
+      </Row>
+      <Modal
+        isActive={isActiveModal}
+        onClose={handleCloseModal}
+        onAdd={handleAddTodos}
+      />
     </>
   );
 };
